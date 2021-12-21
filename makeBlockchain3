@@ -1,0 +1,21 @@
+package main
+
+import (
+	"fmt"
+
+	"github.com/Hunobas/nomadcoin/blockchain"
+)
+
+func main() {
+	chain := blockchain.GetBlockchain()
+	chain.AddBlock("Second Block")
+	chain.AddBlock("Seconds Block")
+	chain.AddBlock("Fourth Block")
+	chain.AddBlock("Genesis Block")
+
+	for _, block := range chain.AllBlocks() {
+		fmt.Printf("Data: %s\n", block.GetData())
+		fmt.Printf("Hash: %s\n", block.GetHash())
+		fmt.Printf("Previous Hash: %s\n\n", block.GetPrevHash())
+	}
+}

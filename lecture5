@@ -1,0 +1,20 @@
+package main
+
+import "fmt"
+
+type person struct {
+	name string
+	age  int
+}
+
+func (p person) sayHello() {
+	fmt.Printf("Hello! My name is %s and I'm %d\n", p.name, p.age)
+}
+
+func main() {
+	// do the same function
+	//nico := person{"nico", 12}
+	nico := person{name: "Taehoon", age: 24}
+	nico.sayHello()
+	fmt.Println("and it is so sad")
+}
