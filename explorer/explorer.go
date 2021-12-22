@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-
-	"github.com/Hunobas/nomadcoin/blockchain"
 )
 
 const (
