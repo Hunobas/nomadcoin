@@ -1,13 +1,24 @@
 package main
 
 import (
-	"github.com/Hunobas/nomadcoin/blockchain"
-	"github.com/Hunobas/nomadcoin/cli"
-	"github.com/Hunobas/nomadcoin/db"
+	"crypto/sha256"
+	"fmt"
+	"strings"
 )
 
 func main() {
-	defer db.Close()
-	blockchain.Blockchain()
-	cli.Start()
+	difficulty := 6
+	target := strings.Repeat("0", difficulty)
+	nonce := 1
+
+	for {
+		hash := fmt.Sprintf("%x", sha256.Sum256([]byte("hello"+fmt.Sprint(nonce))))
+		if strings.HasPrefix(hash, target) {
+			fmt.Printf("hello%d\n", nonce)
+			fmt.Println(hash)
+			return
+		} else {
+			nonce++
+		}
+	}
 }
