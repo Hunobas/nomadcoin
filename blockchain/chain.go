@@ -7,9 +7,15 @@ import (
 	"github.com/Hunobas/nomadcoin/utils"
 )
 
+const (
+	defaultDifficulty  = 2
+	difficultyInterval = 5
+)
+
 type blockchain struct {
-	NewestHash string `json:"newestHash"`
-	Height     int    `json:"height"`
+	NewestHash        string `json:"newestHash"`
+	Height            int    `json:"height"`
+	CurrentDifficulty int    `json:"currentDifficulty"`
 }
 
 var b *blockchain
@@ -43,6 +49,16 @@ func (b *blockchain) Blocks() []*Block {
 		}
 	}
 	return blocks
+}
+
+func (b *blockchain) difficulty() int {
+	if b.Height == 0 {
+		return defaultDifficulty
+	} else if b.Height%difficultyInterval == 0 {
+		// recalculate the difficulty
+	} else {
+		return
+	}
 }
 
 func Blockchain() *blockchain {
