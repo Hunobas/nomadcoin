@@ -64,7 +64,7 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 	total := 0
 	oldTxOuts := Blockchain().TxOutsByAddress(from)
 	for _, txOut := range oldTxOuts {
-		if total > amount {
+		if total >= amount {
 			break
 		}
 		txIn := &TxIn{txOut.Owner, txOut.Amount}
@@ -95,4 +95,12 @@ func (m *mempool) AddTx(to string, amount int) error {
 	}
 	m.Txs = append(m.Txs, tx)
 	return nil
+}
+
+func (m *mempool) txToConfirm() []*Tx {
+	coinbase := makeCoinbaseTx("huno")
+	txs := m.Txs
+	txs = append(txs, coinbase)
+	m.Txs = nil
+	return txs
 }
