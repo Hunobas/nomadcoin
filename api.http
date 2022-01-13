@@ -26,12 +26,12 @@ POST http://localhost:4000/transactions
 
 {
     "to":"nico",
-    "amount":300
+    "amount":210
 }
 
 ###
 
-http://localhost:4000/balance/huno?total=true
+http://localhost:4000/balance/nico?total=true
 
 ###
 
