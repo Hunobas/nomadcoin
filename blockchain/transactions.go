@@ -41,6 +41,18 @@ type UTxOut struct {
 	Amount int    `json:"amount"`
 }
 
+func isOnMempool(uTxOut *UTxOut) bool {
+	exists := false
+	for _, tx := range Mempool.Txs {
+		for _, input := range tx.TxIns {
+			if input.TxID == uTxOut.TxID && input.Index == uTxOut.Index {
+				exists = true
+			}
+		}
+	}
+	return exists
+}
+
 func (t *Tx) getId() {
 	t.ID = utils.Hash(t)
 }
