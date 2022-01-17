@@ -5,6 +5,8 @@
 *.so
 *.dylib
 *.db
+*.db.lock
+*.wallet
 
 # Test binary, built with `go test -c`
 *.test
