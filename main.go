@@ -1,11 +1,7 @@
 package main
 
-import (
-	"github.com/Hunobas/nomadcoin/cli"
-	"github.com/Hunobas/nomadcoin/db"
-)
+import "github.com/Hunobas/nomadcoin/wallet"
 
 func main() {
-	defer db.Close()
-	cli.Start()
+	wallet.Start()
 }

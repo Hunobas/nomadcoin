@@ -23,7 +23,7 @@ type blockchain struct {
 var b *blockchain
 var once sync.Once
 
-func (b *blockchain) restore(data []byte) {
+func (b *blockchain) restoreBlockchain(data []byte) {
 	utils.FromeBytes(b, data)
 }
 
@@ -124,7 +124,7 @@ func Blockchain() *blockchain {
 		if checkpoint == nil {
 			b.AddBlock()
 		} else {
-			b.restore(checkpoint)
+			b.restoreBlockchain(checkpoint)
 		}
 	})
 	return b
