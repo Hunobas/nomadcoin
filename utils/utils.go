@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"encoding/hex"
 	"fmt"
 	"log"
 )
@@ -30,4 +31,10 @@ func Hash(i interface{}) string {
 	s := fmt.Sprintf("%v", i)
 	hash := sha256.Sum256([]byte(s))
 	return fmt.Sprintf("%x", hash)
+}
+
+func DecodeStringOrErr(s string) (bytes []byte) {
+	bytes, err := hex.DecodeString(s)
+	HandleErr(err)
+	return
 }

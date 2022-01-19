@@ -5,7 +5,6 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
-	"encoding/hex"
 	"fmt"
 	"math/big"
 	"os"
@@ -49,27 +48,28 @@ func restoreKey() (key *ecdsa.PrivateKey) {
 	return
 }
 
-func aFromK(key *ecdsa.PrivateKey) string {
-	z := append(key.X.Bytes(), key.Y.Bytes()...)
+func encodeBigInts(a, b []byte) string {
+	z := append(a, b...)
 	return fmt.Sprintf("%x", z)
 }
 
-func sign(payload string, w *wallet) string {
-	payloadAsB, err := hex.DecodeString(payload)
+func aFromK(key *ecdsa.PrivateKey) string {
+	return encodeBigInts(key.X.Bytes(), key.Y.Bytes())
+}
+
+func sign(payload string, w wallet) string {
+	// 꼭 필요한 기능은 아니지만, 주어진 explicit한 string형태를 띄고 있는지 확인하기 위함.
+	payloadBytes := utils.DecodeStringOrErr(payload)
+	//
+	r, s, err := ecdsa.Sign(rand.Reader, w.privateKey, payloadBytes)
 	utils.HandleErr(err)
-	r, s, err := ecdsa.Sign(rand.Reader, w.privateKey, payloadAsB)
-	utils.HandleErr(err)
-	signature := append(r.Bytes(), s.Bytes()...)
-	return fmt.Sprintf("%x", signature)
+	return encodeBigInts(r.Bytes(), s.Bytes())
 }
 
 func restoreBigInts(payload string) (*big.Int, *big.Int, error) {
-	bytes, err := hex.DecodeString(payload)
-	if err != nil {
-		return nil, nil, err
-	}
-	firstHalfBytes := bytes[:len(bytes)/2]
-	secondHalfBytes := bytes[len(bytes)/2:]
+	payloadBytes := utils.DecodeStringOrErr(payload)
+	firstHalfBytes := payloadBytes[:len(payloadBytes)/2]
+	secondHalfBytes := payloadBytes[len(payloadBytes)/2:]
 	bigA, bigB := big.Int{}, big.Int{}
 	bigA.SetBytes(firstHalfBytes)
 	bigB.SetBytes(secondHalfBytes)
@@ -82,10 +82,13 @@ func verify(signature, payload, address string) bool {
 	x, y, err := restoreBigInts(address)
 	utils.HandleErr(err)
 	publicKey := ecdsa.PublicKey{
-		curve: elliptic.P256(),
+		Curve: elliptic.P256(),
 		X:     x,
 		Y:     y,
 	}
+	payloadBytes := utils.DecodeStringOrErr(payload)
+	ok := ecdsa.Verify(&publicKey, payloadBytes, r, s)
+	return ok
 }
 
 func Wallet() *wallet {

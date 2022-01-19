@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Hunobas/nomadcoin/utils"
+	"github.com/Hunobas/nomadcoin/wallet"
 )
 
 const (
@@ -25,14 +26,14 @@ type Tx struct {
 }
 
 type TxIn struct {
-	TxID  string `json:"txID"`
-	Index int    `json:"index"`
-	Owner string `json:"owner"`
+	TxID      string `json:"txId"`
+	Index     int    `json:"index"`
+	Signature string `json:"signature"`
 }
 
 type TxOut struct {
-	Owner  string `json:"owner"`
-	Amount int    `json:"amount"`
+	Address string `json:"address"`
+	Amount  int    `json:"amount"`
 }
 
 type UTxOut struct {
@@ -46,7 +47,7 @@ func (t *Tx) getId() {
 }
 
 func (m *mempool) AddTx(to string, amount int) error {
-	tx, err := makeTx("huno", to, amount)
+	tx, err := makeTx(wallet.Wallet().Address, to, amount)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (m *mempool) AddTx(to string, amount int) error {
 }
 
 func (m *mempool) TxToConfirm() []*Tx {
-	coinbase := makeCoinbaseTx("huno")
+	coinbase := makeCoinbaseTx(wallet.Wallet().Address)
 	txs := m.Txs
 	txs = append(txs, coinbase)
 	m.Txs = nil
