@@ -46,6 +46,29 @@ func (t *Tx) getId() {
 	t.ID = utils.Hash(t)
 }
 
+func (t *Tx) sign() {
+	for _, txIn := range t.TxIns {
+		txIn.Signature = wallet.Sign(t.ID, wallet.Wallet())
+	}
+}
+
+func validate(tx *Tx) bool {
+	valid := true
+	for _, txIn := range tx.TxIns {
+		prevTx := FindTx(Blockchain(), txIn.TxID)
+		if prevTx == nil {
+			valid = false
+			break
+		}
+		address := prevTx.TxOuts[txIn.Index].Address
+		valid = wallet.Verify(txIn.Signature, tx.ID, address)
+		if !valid {
+			break
+		}
+	}
+	return valid
+}
+
 func (m *mempool) AddTx(to string, amount int) error {
 	tx, err := makeTx(wallet.Wallet().Address, to, amount)
 	if err != nil {
@@ -84,19 +107,22 @@ func makeCoinbaseTx(address string) *Tx {
 	txOuts := []*TxOut{
 		{address, minerReward},
 	}
-	tx := Tx{
+	tx := &Tx{
 		ID:        "",
 		Timestamp: int(time.Now().Unix()),
 		TxIns:     txIns,
 		TxOuts:    txOuts,
 	}
 	tx.getId()
-	return &tx
+	return tx
 }
+
+var ErrorNoMoney = errors.New("not enough tokens")
+var ErrorNotValid = errors.New("Tx Invalid")
 
 func makeTx(from, to string, amount int) (*Tx, error) {
 	if BalanceByAddress(from, Blockchain()) < amount {
-		return nil, errors.New("not enough tokens")
+		return nil, ErrorNoMoney
 	}
 	var txOuts []*TxOut
 	var txIns []*TxIn
@@ -123,5 +149,10 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 		TxOuts:    txOuts,
 	}
 	tx.getId()
+	tx.sign()
+	valid := validate(tx)
+	if !valid {
+		return nil, ErrorNotValid
+	}
 	return tx, nil
 }
