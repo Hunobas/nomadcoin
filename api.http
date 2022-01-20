@@ -26,13 +26,23 @@ POST http://localhost:4000/transactions
 
 {
     "to":"nico",
-    "amount":10
+    "amount":20
 }
 
 ###
 
-http://localhost:4000/balance/huno?total=true
+http://localhost:4000/balance/3466f83715fbc26a74152f4477b43b0084366c944f4df6a3a271ff978d05495990f57139d08dce2b3591d34cc72e9d71939c6e0422ca29845b4d29c95542ba54?total=true
+// verify by private key
+
+###
+
+http://localhost:4000/balance/nico?total=true
+// verify by public key
 
 ###
 
 http://localhost:4000/mempool
+
+###
+
+http://localhost:4000/wallet
