@@ -8,7 +8,17 @@
 </head>
 <body>
     <script>
-        const socket = new WebSocket("ws://localhost:4000/ws")
+        const socket = new WebSocket("ws://localhost:4000/ws");
+        socket.addEventListener("close", () => console.log("closed"));
+        setTimeout(() => {
+            socket.send("hello darling! js > go")
+        }, 5000)
+        setTimeout(() => {
+            socket.send("hello again")
+        }, 10000)
+        setTimeout(() => {
+            socket.send("hello !!!!!!!")
+        }, 20000)
     </script>
 </body>
 </html>
