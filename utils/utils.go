@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"strings"
 )
 
 func HandleErr(err error) {
@@ -37,4 +38,12 @@ func DecodeStringOrErr(s string) (bytes []byte) {
 	bytes, err := hex.DecodeString(s)
 	HandleErr(err)
 	return
+}
+
+func Splitter(s string, sep string, i int) string {
+	r := strings.Split(s, sep)
+	if len(r)-1 < i {
+		return ""
+	}
+	return r[i]
 }
