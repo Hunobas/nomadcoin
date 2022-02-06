@@ -2,6 +2,7 @@ package p2p
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/Hunobas/nomadcoin/blockchain"
 	"github.com/Hunobas/nomadcoin/utils"
@@ -20,20 +21,14 @@ type Message struct {
 	Payload []byte
 }
 
-func (m *Message) addPayload(p interface{}) {
-	b, err := json.Marshal(p)
-	utils.HandleErr(err)
-	m.Payload = b
-}
-
 func makeMessage(kind MessageKind, payload interface{}) []byte {
 	m := Message{
 		Kind: kind,
+		// 보낼 payload의 정보가 각각 다르기 때문에 Json으로 바꿈. (모든 블록, newest블록, 트랜젝션, 등등...)
+		Payload: utils.ToJSON(payload),
 	}
-	m.addPayload(payload)
-	mJson, err := json.Marshal(m)
-	utils.HandleErr(err)
-	return mJson
+	// 다른 port끼리 통신하기 위해서 byte 형태로써 Json으로 바꿈. (ToBytes를 안하는 이유 : 크로스 플랫폼(다른 언어)에서 주고받을 수 있도록 하기 위해)
+	return utils.ToJSON(m)
 }
 
 func sendNewestBlock(p *peer) {
@@ -41,4 +36,13 @@ func sendNewestBlock(p *peer) {
 	utils.HandleErr(err)
 	m := makeMessage(MessageNewestBlock, b)
 	p.inbox <- m
+}
+
+func handleMsg(m *Message, p *peer) {
+	switch m.Kind {
+	case MessageNewestBlock:
+		var payload blockchain.Block
+		utils.HandleErr(json.Unmarshal(m.Payload, &payload))
+		fmt.Println(payload)
+	}
 }
