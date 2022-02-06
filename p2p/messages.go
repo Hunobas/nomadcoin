@@ -2,7 +2,6 @@ package p2p
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/Hunobas/nomadcoin/blockchain"
 	"github.com/Hunobas/nomadcoin/utils"
@@ -38,13 +37,32 @@ func sendNewestBlock(p *peer) {
 	p.inbox <- m
 }
 
+func requestAllBlocks(p *peer) {
+	m := makeMessage(MessageAllBlocksRequest, nil)
+	p.inbox <- m
+}
+
+func sendAllBlocks(p *peer) {
+	m := makeMessage(MessageAllBlocksResponse, blockchain.Blocks(blockchain.Blockchain()))
+	p.inbox <- m
+}
+
 func handleMsg(m *Message, p *peer) {
 	switch m.Kind {
 	case MessageNewestBlock:
 		var newestBlock blockchain.Block
 		utils.HandleErr(json.Unmarshal(m.Payload, &newestBlock))
-		fmt.Println(newestBlock)
+		b, err := blockchain.FindBlock(blockchain.Blockchain().NewestHash)
+		utils.HandleErr(err)
+		if newestBlock.Height >= b.Height {
+			requestAllBlocks(p)
+		} else {
+			sendNewestBlock(p)
+		}
 	case MessageAllBlocksRequest:
+		sendAllBlocks(p)
 	case MessageAllBlocksResponse:
+		var allBlocks []*blockchain.Block
+		utils.HandleErr(json.Unmarshal(m.Payload, allBlocks))
 	}
 }
