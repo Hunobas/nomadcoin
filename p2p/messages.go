@@ -2,6 +2,7 @@ package p2p
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/Hunobas/nomadcoin/blockchain"
 	"github.com/Hunobas/nomadcoin/utils"
@@ -31,6 +32,7 @@ func makeMessage(kind MessageKind, payload interface{}) []byte {
 }
 
 func sendNewestBlock(p *peer) {
+	fmt.Printf("Sending newest block to %s\n", p.key)
 	b, err := blockchain.FindBlock(blockchain.Blockchain().NewestHash)
 	utils.HandleErr(err)
 	m := makeMessage(MessageNewestBlock, b)
@@ -50,19 +52,25 @@ func sendAllBlocks(p *peer) {
 func handleMsg(m *Message, p *peer) {
 	switch m.Kind {
 	case MessageNewestBlock:
+		fmt.Printf("Received the newest block from %s\n", p.key)
 		var newestBlock blockchain.Block
 		utils.HandleErr(json.Unmarshal(m.Payload, &newestBlock))
 		b, err := blockchain.FindBlock(blockchain.Blockchain().NewestHash)
 		utils.HandleErr(err)
 		if newestBlock.Height >= b.Height {
+			fmt.Printf("Requesting all blocks from %s\n", p.key)
 			requestAllBlocks(p)
 		} else {
+			fmt.Printf("Sending newest block to %s\n", p.key)
 			sendNewestBlock(p)
 		}
 	case MessageAllBlocksRequest:
+		fmt.Printf("%s wants all the blocks.\n", p.key)
 		sendAllBlocks(p)
 	case MessageAllBlocksResponse:
+		fmt.Printf("Received all the blocks from %s\n", p.key)
 		var allBlocks []*blockchain.Block
-		utils.HandleErr(json.Unmarshal(m.Payload, allBlocks))
+		utils.HandleErr(json.Unmarshal(m.Payload, &allBlocks))
+		blockchain.Blockchain().Replace(allBlocks)
 	}
 }
