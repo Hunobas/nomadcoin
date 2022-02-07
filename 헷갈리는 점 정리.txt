@@ -1,21 +1,23 @@
-헷갈린 점 정리.
+헷갈린 점 정리
 
 1. blockchain.UTxOutsByAddress에서 map을 사용한 이유. 굳이?
    if _, ok := creatorTxs[tx.ID]; !ok { . . . } 부분에서 ok만 쓴 이유를 모르겠다. value가 bool값이었으니 value를 쓰는 것이 맞지 않나? 존재하는지 여부를 확인하기 위한 ok변수를 쓴 것에 대한 고찰 필요
 
-2. Peers 끼리 통신할 때 inbox chan을 쓴 메커니즘? inbox는 Port안에서 go read<->go write끼리 통신하기 위해 사용한건가? 아니면 go peer끼리 통신하기 위해 사용한건가?
+2. Peers 끼리 통신할 때 inbox chan을 쓴 메커니즘?
+   inbox는 Port안에서 go read<->go write끼리 통신하기 위해 사용한건가?
+   아니면 go peer<->go peer끼리 통신하기 위해 사용한건가?
 
 3.
    Port4000 ◎<====>◎ Port3000
-               (p)   Peer   (p)			왜 변수가 다 p임? 구분하기가 어렵다..
- (from 4000 to 3000)  (from 3000 to 4000)
+           (p) Peer (p)		            	왜 변수가 다 p임? 구분하기가 어렵다..
+(from 4000 to 3000)(from 3000 to 4000)
 
 4. 모든 peer의 mempool을 공유시키기 위해 mempool에 map을 쓴 메커니즘? 니꼬왈: peer와 비슷한 메커니즘이라고 말함. 즉 아래 두개 비교 요망.
 
-type peers struct {			|	type mempool struct {
-	v map[string]*peer		|		Txs map[string]*Tx
-	m sync.Mutex		|		m   sync.Mutex
-}				|	}
+type peers struct {			|	   type mempool struct {
+	v map[string]*peer		|		   Txs map[string]*Tx
+	m sync.Mutex		      |		   m   sync.Mutex
+}				               |	   }
 
 √5. 새로운 peer가 한 node에 연결 요청(listening socket)이 들어왔을 때 새로운 peer를 broadcasting하기 위해 newPort뿐만 아니라 openPort(넌 이러이러한 port니깐 newPort랑 연결해)도 알려줘야 했던 이유:
  - 위 동작은 연결 요청을 받았던, 그리고 broadcasting을 주도한 port의 시점에서 동작했으므로, newPort뿐만 아니라 상대방 port가 무엇인지 알려줄 의무가 있다.
