@@ -3,6 +3,7 @@ package p2p
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Hunobas/nomadcoin/blockchain"
 	"github.com/Hunobas/nomadcoin/utils"
@@ -103,6 +104,7 @@ func handleMsg(m *Message, p *peer) {
 	case MessageNewPeerNotify:
 		var newPeer string
 		utils.HandleErr(json.Unmarshal(m.Payload, &newPeer))
-
+		parts := strings.Split(newPeer, ":")
+		AddPeer(parts[0], parts[1], parts[2], false)
 	}
 }
