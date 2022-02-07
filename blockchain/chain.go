@@ -30,12 +30,13 @@ func (b *blockchain) restoreBlockchain(data []byte) {
 	utils.FromeBytes(b, data)
 }
 
-func (b *blockchain) AddBlock() {
+func (b *blockchain) AddBlock() *Block {
 	block := createBlock(b.NewestHash, b.Height+1, getDifficulty(b))
 	b.NewestHash = block.Hash
 	b.Height = block.Height
 	b.CurrentDifficulty = block.Difficulty
 	persistBlockchain(b)
+	return block
 }
 
 func (b *blockchain) Replace(newBlocks []*Block) {
@@ -172,4 +173,18 @@ func Status(b *blockchain, rw http.ResponseWriter) {
 	b.m.Lock()
 	defer b.m.Unlock()
 	utils.HandleErr(json.NewEncoder(rw).Encode(b))
+}
+
+func (b *blockchain) AddPeerBlock(block *Block) {
+	b.m.Lock()
+	defer b.m.Unlock()
+
+	b.Height += 1
+	b.CurrentDifficulty = block.Difficulty
+	b.NewestHash = block.Hash
+
+	persistBlock(block)
+	persistBlockchain(b)
+
+	// mempool
 }

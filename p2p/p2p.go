@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Hunobas/nomadcoin/blockchain"
 	"github.com/Hunobas/nomadcoin/utils"
 	"github.com/gorilla/websocket"
 )
@@ -30,4 +31,12 @@ func AddPeer(address, port, openPort string) {
 	utils.HandleErr(err)
 	p := initPeer(conn, address, port)
 	sendNewestBlock(p)
+}
+
+func BroadcastNewBlock(b *blockchain.Block) {
+	Peers.m.Lock()
+	defer Peers.m.Unlock()
+	for _, p := range Peers.v {
+		notifyNewBlock(b, p)
+	}
 }
