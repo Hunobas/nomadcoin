@@ -175,16 +175,25 @@ func Status(b *blockchain, rw http.ResponseWriter) {
 	utils.HandleErr(json.NewEncoder(rw).Encode(b))
 }
 
-func (b *blockchain) AddPeerBlock(block *Block) {
+func (b *blockchain) AddPeerBlock(newBlock *Block) {
 	b.m.Lock()
-	defer b.m.Unlock()
+	m.m.Lock()
+	defer func() {
+		b.m.Unlock()
+		m.m.Unlock()
+	}()
 
 	b.Height += 1
-	b.CurrentDifficulty = block.Difficulty
-	b.NewestHash = block.Hash
+	b.CurrentDifficulty = newBlock.Difficulty
+	b.NewestHash = newBlock.Hash
 
-	persistBlock(block)
+	persistBlock(newBlock)
 	persistBlockchain(b)
 
-	// mempool
+	for _, tx := range newBlock.Transactions {
+		_, ok := m.Txs[tx.ID]
+		if ok {
+			delete(m.Txs, tx.ID)
+		}
+	}
 }
