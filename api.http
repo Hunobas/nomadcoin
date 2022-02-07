@@ -71,7 +71,7 @@ POST http://localhost:2000/peers
 
 {
     "address": "127.0.0.1",
-    "port": "2500"
+    "port": "5000"
 }
 
 ###
