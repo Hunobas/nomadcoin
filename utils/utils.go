@@ -1,3 +1,4 @@
+// Contains functions to be used across the application.
 package utils
 
 import (
@@ -24,11 +25,13 @@ func ToBytes(i interface{}) []byte {
 	return aBuffer.Bytes()
 }
 
+// Frombytes takes an interface and data, then will encode the data to the  interface
 func FromeBytes(i interface{}, data []byte) {
 	encoder := gob.NewDecoder(bytes.NewReader(data))
 	HandleErr(encoder.Decode(i))
 }
 
+// Hash takes an interface and hashes it and returns the hex encoding of the hash.
 func Hash(i interface{}) string {
 	s := fmt.Sprintf("%v", i)
 	hash := sha256.Sum256([]byte(s))
