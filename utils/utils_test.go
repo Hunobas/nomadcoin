@@ -79,6 +79,32 @@ func TestHandleErr(t *testing.T) {
 	err := errors.New("test")
 	HandleErr(err)
 	if !called {
-		t.Error("HandleError should call fn")
+		t.Error("HandleError should call logFn")
+	}
+}
+
+func TestDecodeStringOrErr(t *testing.T) {
+	oldLogFn := logFn
+	defer func() {
+		logFn = oldLogFn
+	}()
+	called := false
+	logFn = func(v ...interface{}) {
+		called = true
+	}
+
+	tests := []string{
+		"!",
+		"ABCDEFG",
+		"41g",
+		"000BAA@",
+	}
+
+	for _, tc := range tests {
+		DecodeStringOrErr(tc)
+		if !called {
+			t.Error("DecodeStringOrErr should call logFn if the input is improper")
+		}
+		called = false
 	}
 }

@@ -1,4 +1,4 @@
-// Contains functions to be used across the application.
+// Package utils contains functions to be used across the application.
 package utils
 
 import (
@@ -12,9 +12,11 @@ import (
 	"strings"
 )
 
+var logFn = log.Panic
+
 func HandleErr(err error) {
 	if err != nil {
-		log.Panic(err)
+		logFn(err)
 	}
 }
 
@@ -31,7 +33,7 @@ func FromeBytes(i interface{}, data []byte) {
 	HandleErr(encoder.Decode(i))
 }
 
-// Hash takes an interface and hashes it and returns the hex encoding of the hash.
+// Hash takes an interface, hashes it and returns the hex encoding of the hash.
 func Hash(i interface{}) string {
 	s := fmt.Sprintf("%v", i)
 	hash := sha256.Sum256([]byte(s))
